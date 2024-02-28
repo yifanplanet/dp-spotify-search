@@ -31,7 +31,6 @@ const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
         onClose();
       }
     };
-
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
