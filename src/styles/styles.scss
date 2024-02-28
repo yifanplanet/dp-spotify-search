@@ -364,3 +364,29 @@ ul {
 .close-button::after {
   transform: rotate(-45deg);
 }
+
+.mobile-block-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: $color-dp-purple;
+  z-index: 9999;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  gap: 16px;
+  box-sizing: border-box;
+  & .message {
+    color: $color-white;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 600px;
+  }
+}
