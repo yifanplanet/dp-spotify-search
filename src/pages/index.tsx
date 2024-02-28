@@ -42,13 +42,22 @@ export default function Home() {
   }, []);
 
   const handleSearch = async (query: string) => {
-    if (!user?.accessToken) return;
+    if (!user?.accessToken || !user?.refreshToken) return;
     if (!query.trim()) {
       setSearchResults([]);
       setSelectedTrack(null);
       return;
     }
-    const results = await searchTracks(user?.accessToken, query);
+
+    console.log("Searching for", query);
+    console.log("user?.accessToken", user?.accessToken);
+    console.log("user?.refreshToken", user?.refreshToken);
+
+    const results = await searchTracks({
+      accessToken: user?.accessToken,
+      refreshToken: user?.refreshToken,
+      query,
+    });
     setSearchResults(results);
   };
 
@@ -81,7 +90,7 @@ export default function Home() {
     <main className="main-container">
       {isLoading ? (
         <h1>Loading...</h1>
-      ) : !user ? (
+      ) : !user?.accessToken ? (
         <Login />
       ) : (
         <div className="layout">

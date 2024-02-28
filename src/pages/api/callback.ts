@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
 import querystring from "querystring";
 import { parse } from "cookie";
-import { SPOTIFY_API, TOKEN_ENDPOINT } from "../../lib/constants";
+import { SPOTIFY_API } from "../../lib/constants";
 import { sql } from "@vercel/postgres";
 
 export default async function handler(
@@ -23,7 +23,7 @@ export default async function handler(
   }
 
   const authOptions = {
-    url: TOKEN_ENDPOINT,
+    url: SPOTIFY_API.TOKEN,
     method: "post",
     params: {
       grant_type: "authorization_code",
