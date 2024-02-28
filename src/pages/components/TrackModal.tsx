@@ -11,7 +11,7 @@ interface TrackModalProps {
 const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -39,8 +39,10 @@ const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
   useEffect(() => {
     // Play audio when the modal opens
     if (track.previewUrl) {
-      audioRef.current = new Audio(track.previewUrl);
-      audioRef.current.play().catch((error) => console.error("Playback error:", error));
+      const audio = new Audio(track.previewUrl);
+      audio.volume = 0.5;
+      audio.play().catch((error) => console.error("Playback error:", error));
+      audioRef.current = audio;
     }
 
     return () => {
@@ -51,7 +53,7 @@ const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
       }
     };
   }, [track]);
-  
+
   return (
     <div className="modal-overlay">
       {/* <button
