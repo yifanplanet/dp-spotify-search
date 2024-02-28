@@ -59,3 +59,23 @@ export type SpotifyTrack = {
   type: string;
   uri: string;
 };
+
+export type SpotifyUser = {
+  display_name: string;
+  external_urls: {
+    spotify: string;
+  };
+  followers: {
+    href: string;
+    total: number;
+  };
+  href: string;
+  id: string;
+  images: {
+    height: number;
+    url: string;
+    width: number;
+  }[];
+  type: string;
+  uri: string;
+};

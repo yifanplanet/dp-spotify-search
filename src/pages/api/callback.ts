@@ -3,7 +3,6 @@ import axios from "axios";
 import querystring from "querystring";
 import { parse } from "cookie";
 import { SPOTIFY_API } from "../../lib/constants";
-import { sql } from "@vercel/postgres";
 import { updateUser } from "@/lib/user";
 
 export default async function handler(
@@ -67,11 +66,7 @@ export default async function handler(
       );
     }
 
-    const {
-      id: spotifyUserId,
-      display_name: name,
-      images,
-    } = userProfile.data;
+    const { id: spotifyUserId, display_name: name, images } = userProfile.data;
 
     res.setHeader(
       "Set-Cookie",
