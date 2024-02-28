@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { searchTracks } from "@/lib/spotifyClient";
 import SearchBar from "./components/SearchBar";
 import Login from "./components/Login";
@@ -9,10 +9,13 @@ import { useUser } from "@/hooks/useUser";
 import SearchResults from "./components/SearchResults";
 import { Track } from "@/lib/types";
 import TrackModal from "./components/TrackModal";
+import { debounce } from "@/lib/utils";
 
 export default function Home() {
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const { user, isLoading } = useUser();
 
@@ -30,6 +33,9 @@ export default function Home() {
         console.error("Error refreshing access token:", error);
       }
     };
+
+    setSearchResults([]);
+    setSelectedTrack(null);
 
     if (
       (!user?.accessToken ||
@@ -49,9 +55,7 @@ export default function Home() {
       return;
     }
 
-    console.log("Searching for", query);
-    console.log("user?.accessToken", user?.accessToken);
-    console.log("user?.refreshToken", user?.refreshToken);
+    setSearchQuery(query);
 
     const results = await searchTracks({
       accessToken: user?.accessToken,
@@ -59,6 +63,31 @@ export default function Home() {
       query,
     });
     setSearchResults(results);
+  };
+
+  const handleLoadMore = async () => {
+    if (!user?.accessToken || !user?.refreshToken || !searchQuery) return;
+    setLoadingMore(true);
+    try {
+      const results: Track[] = await searchTracks({
+        accessToken: user?.accessToken,
+        refreshToken: user?.refreshToken,
+        query: searchQuery,
+        offset: searchResults.length,
+      });
+
+      const uniqueResults = results.filter((result) => {
+        return !searchResults.some(
+          (existingResult) => existingResult.id === result.id
+        );
+      });
+
+      setSearchResults((prevResults) => [...prevResults, ...uniqueResults]);
+    } catch (error) {
+      console.error("Error loading more tracks", error);
+    } finally {
+      setTimeout(() => setLoadingMore(false), 2000);
+    }
   };
 
   const handleClickTrack = async (track: Track) => {
@@ -80,7 +109,6 @@ export default function Home() {
           album,
         }),
       });
-      console.log(`Added ${name} to search history`);
     } catch (error) {
       console.error("Failed to add track to history", error);
     }
@@ -101,6 +129,8 @@ export default function Home() {
             <SearchResults
               searchResults={searchResults}
               handleClickTrack={handleClickTrack}
+              handleClickMore={handleLoadMore}
+              loading={loadingMore}
             />
           )}
 

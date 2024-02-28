@@ -6,14 +6,18 @@ export const searchTracks = async ({
   accessToken,
   refreshToken,
   query,
+  offset = 0,
 }: {
   accessToken: string;
   refreshToken: string;
   query: string;
+  offset?: number;
 }) => {
   try {
     const { data } = await axios.get(
-      `${SPOTIFY_API.SEARCH}?type=track&q=${encodeURIComponent(query)}`,
+      `${SPOTIFY_API.SEARCH}?type=track&q=${encodeURIComponent(
+        query
+      )}&limit=20&offset=${offset}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -27,6 +31,7 @@ export const searchTracks = async ({
       artists: track.artists.map((a) => a.name).join(", "),
       album: track.album.name,
       externalUrl: track.external_urls.spotify,
+      previewUrl: track.preview_url,
     }));
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -37,16 +42,19 @@ export const searchTracks = async ({
         responseError.error.message === "The access token expired" &&
         refreshToken
       ) {
-        // Token has expired, attempt to login
-        window.location.href = "/api/login";
         // Token has expired, attempt to refresh it
-        await fetch("/api/refresh", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refreshToken }),
-        });
+        try {
+          await fetch("/api/refresh", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+        } catch (error) {
+          console.error("Error refreshing access token:", error);
+          window.location.href = "/api/login";
+        }
       }
 
       window.location.href = "/api/login";

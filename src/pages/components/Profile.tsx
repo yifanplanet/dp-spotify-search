@@ -7,8 +7,8 @@ export default function Profile({ user }: ProfileProps) {
   if (user)
     return (
       <div className="profile-container">
-        {user.profileUrl && (
-          <img src={user.profileUrl} alt={user.name} width="50" height="50" />
+        {user.imageUrl && (
+          <img src={user.imageUrl} alt={user.name} width="50" height="50" />
         )}
         <h2>{user.name}</h2>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Track } from "@/lib/types";
 import Image from "next/image";
 import { OPEN_SPOTIFY } from "@/lib/constants";
@@ -10,7 +10,8 @@ interface TrackModalProps {
 
 const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -35,6 +36,22 @@ const TrackModal: React.FC<TrackModalProps> = ({ track, onClose }) => {
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
+  useEffect(() => {
+    // Play audio when the modal opens
+    if (track.previewUrl) {
+      audioRef.current = new Audio(track.previewUrl);
+      audioRef.current.play().catch((error) => console.error("Playback error:", error));
+    }
+
+    return () => {
+      // Pause and clean up the audio element when the modal closes
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [track]);
+  
   return (
     <div className="modal-overlay">
       {/* <button

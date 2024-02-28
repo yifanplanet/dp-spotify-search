@@ -4,6 +4,7 @@ import querystring from "querystring";
 import { parse } from "cookie";
 import { SPOTIFY_API } from "../../lib/constants";
 import { sql } from "@vercel/postgres";
+import { updateUser } from "@/lib/user";
 
 export default async function handler(
   req: NextApiRequest,
@@ -67,22 +68,23 @@ export default async function handler(
     }
 
     const {
-      id: spotify_user_id,
+      id: spotifyUserId,
       display_name: name,
       images,
     } = userProfile.data;
 
-    await sql`
-      INSERT INTO users (spotify_user_id, access_token, refresh_token, name, image_url)
-      VALUES ( ${spotify_user_id}, ${access_token}, ${refresh_token}, ${name}, ${images[0]?.url})
-      ON CONFLICT (spotify_user_id) DO UPDATE
-      SET access_token = ${access_token}, refresh_token = ${refresh_token}, name = ${name}, image_url = ${images[0]?.url};
-    `;
-
     res.setHeader(
       "Set-Cookie",
-      `spotifyUserId=${spotify_user_id}; Path=/; HttpOnly; SameSite=Lax`
+      `spotifyUserId=${spotifyUserId}; Path=/; HttpOnly; SameSite=Lax`
     );
+
+    await updateUser({
+      spotifyUserId,
+      name,
+      imageUrl: images[0]?.url,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+    });
 
     res.redirect(`/`);
   } catch (error) {

@@ -197,6 +197,16 @@ ul {
     &.history-entry {
       padding: 8px;
     }
+
+    &.load-more {
+      padding: 24px;
+
+      &.disabled {
+        cursor: default;
+        background-color: $color-gray003;
+        color: $color-gray001;
+      }
+    }
   }
 
   & .track-list-item {

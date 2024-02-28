@@ -55,7 +55,7 @@ $size-mobile: 960px;
   font-size: 18px;
   font-weight: 600;
   @media (min-width: $size-mobile) {
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 
@@ -63,6 +63,6 @@ $size-mobile: 960px;
   font-size: 14px;
   font-weight: 400;
   @media (min-width: $size-mobile) {
-    font-size: 18px;
+    font-size: 16px;
   }
 }

@@ -5,11 +5,15 @@ import React from "react";
 interface SearchResultsProps {
   searchResults: Track[];
   handleClickTrack: (track: Track) => Promise<void>;
+  handleClickMore: () => Promise<void>;
+  loading: boolean;
 }
 
 export default function SearchResults({
   searchResults,
   handleClickTrack,
+  handleClickMore,
+  loading,
 }: SearchResultsProps) {
   return (
     <div className="result-container scroll-container">
@@ -37,6 +41,17 @@ export default function SearchResults({
               </div>
             </li>
           ))}
+        <li
+          className={"load-more text-md" + (loading ? " disabled" : "")}
+          onClick={async (e) => {
+            e.preventDefault;
+            if (!loading) {
+              await handleClickMore();
+            }
+          }}
+        >
+          {loading ? "Loading..." : "More"}
+        </li>
       </ul>
     </div>
   );

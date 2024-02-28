@@ -1,12 +1,5 @@
+import { User } from "@/pages/api/user";
 import { useState, useEffect } from "react";
-
-interface User {
-  name: string;
-  profileUrl: string;
-  accessToken?: string;
-  refreshToken?: string;
-  expiresIn?: string;
-}
 
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -24,7 +17,7 @@ export const useUser = () => {
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
-        setUser(null); // Consider how you want to handle errors
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
