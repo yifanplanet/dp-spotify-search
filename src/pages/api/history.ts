@@ -1,11 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
 import { parse } from "cookie";
-
-interface HistoryEntry {
-  trackId: string;
-  trackName: string;
-}
+import { Track } from "@/lib/types";
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,13 +16,14 @@ export default async function handler(
 
   if (req.method === "POST") {
     // Add a new history entry
-    const { trackId, trackName }: HistoryEntry = req.body;
+    const { id, name, imageUrl, artists, externalUrl, album }: Track = req.body;
     try {
       await sql`
-        INSERT INTO history (spotify_user_id, track_id, track_name)
-        VALUES (${spotifyUserId}, ${trackId}, ${trackName})
+        INSERT INTO history (spotify_user_id, track_id, track_name, artists, image_url, external_url, album)
+        VALUES (${spotifyUserId}, ${id}, ${name}, ${artists}, ${imageUrl}, ${externalUrl}, ${album})
         ON CONFLICT (spotify_user_id, track_id)
-        DO UPDATE SET clicked_at = NOW();
+        DO UPDATE SET track_name = ${name}, artists = ${artists}, image_url = ${imageUrl}, external_url = ${externalUrl}, album = ${album}, clicked_at = NOW();
+        
       `;
       return res.status(200).json({ message: "History added successfully" });
     } catch (error) {
@@ -37,14 +34,23 @@ export default async function handler(
     // Retrieve the user's search history
     try {
       const result = await sql`
-        SELECT track_id, track_name, clicked_at
+        SELECT track_id, track_name, artists, image_url, external_url, album
         FROM history
         WHERE spotify_user_id = ${spotifyUserId}
-        ORDER BY clicked_at DESC;
+        ORDER BY clicked_at DESC
+        LIMIT 10;
       `;
-  
       const history = result.rows;
-      res.status(200).json(history);
+      res.status(200).json(
+        history.map((entry) => ({
+          id: entry.track_id,
+          name: entry.track_name,
+          imageUrl: entry.image_url,
+          artists: entry.artists,
+          album: entry.album,
+          externalUrl: entry.external_url,
+        }))
+      );
     } catch (error) {
       console.error("Failed to retrieve history", error);
       return res.status(500).json({ error: "Internal server error" });

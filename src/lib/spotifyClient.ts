@@ -1,13 +1,37 @@
 import axios from "axios";
+import { SPOTIFY_API } from "./constants";
+import { SpotifyTrack } from "./spotify";
 
 export const searchTracks = async (token: string, query: string) => {
-  const { data } = await axios.get(
-    `https://api.spotify.com/v1/search?type=track&q=${query}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  try {
+    const { data } = await axios.get(
+      `${SPOTIFY_API.SEARCH}?type=track&q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return data.tracks.items.map((track: SpotifyTrack) => ({
+      id: track.id,
+      name: track.name,
+      imageUrl: track.album.images[0].url,
+      artists: track.artists.map((a) => a.name).join(", "),
+      album: track.album.name,
+      externalUrl: track.external_urls.spotify,
+    }));
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const responseError = error.response?.data;
+      if (
+        responseError &&
+        responseError.error.status === 401 &&
+        responseError.error.message === "The access token expired"
+      ) {
+        // Token has expired, attempt to refresh it
+        await axios.get("/api/refresh");
+      }
     }
-  );
-  return data.tracks.items;
+    throw error;
+  }
 };

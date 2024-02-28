@@ -4,16 +4,16 @@ import { useEffect, useState } from "react";
 import { searchTracks } from "@/lib/spotifyClient";
 import SearchBar from "./components/SearchBar";
 import Login from "./components/Login";
-import { useRouter } from "next/router";
 import Profile from "./components/Profile";
 import { useUser } from "@/hooks/useUser";
-import { Track } from "@/lib/spotify";
+import SearchResults from "./components/SearchResults";
+import { Track } from "@/lib/types";
+import TrackModal from "./components/TrackModal";
 
 export default function Home() {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
 
-  const router = useRouter();
   const { user, isLoading } = useUser();
 
   useEffect(() => {
@@ -43,7 +43,11 @@ export default function Home() {
 
   const handleSearch = async (query: string) => {
     if (!user?.accessToken) return;
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      setSearchResults([]);
+      setSelectedTrack(null);
+      return;
+    }
     const results = await searchTracks(user?.accessToken, query);
     setSearchResults(results);
   };
@@ -51,14 +55,21 @@ export default function Home() {
   const handleClickTrack = async (track: Track) => {
     setSelectedTrack(track);
 
-    const { id, name, album, artists } = track;
+    const { id, name, album, artists, imageUrl, externalUrl } = track;
     try {
       await fetch("/api/history", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ trackId: id, trackName: name }),
+        body: JSON.stringify({
+          id,
+          name,
+          imageUrl,
+          artists,
+          externalUrl,
+          album,
+        }),
       });
       console.log(`Added ${name} to search history`);
     } catch (error) {
@@ -67,49 +78,30 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="main-container">
       {isLoading ? (
         <h1>Loading...</h1>
       ) : !user ? (
         <Login />
       ) : (
-        <>
+        <div className="layout">
           <Profile user={user} />
-          <SearchBar onSearch={handleSearch} />
-          {selectedTrack && (
-            <div>
-              <h2>Selected Track</h2>
-              <p>{selectedTrack.name}</p>
-              <p>{selectedTrack.album.name}</p>
-              <p>{selectedTrack.artists.map((a) => a.name).join(", ")}</p>
-              <Image
-                src={selectedTrack.album.images[0].url}
-                alt={selectedTrack.name}
-                width={200}
-                height={200}
-              />
-            </div>
+          <SearchBar onSearch={handleSearch} searchResults={searchResults} />
+
+          {!!searchResults.length && (
+            <SearchResults
+              searchResults={searchResults}
+              handleClickTrack={handleClickTrack}
+            />
           )}
-          <ul className="grid grid-cols-3 gap-4">
-            {searchResults.map((track) => (
-              <li
-                key={track.id}
-                onClick={async (e) => {
-                  e.preventDefault;
-                  await handleClickTrack(track);
-                }}
-              >
-                <Image
-                  src={track.album.images[0].url}
-                  alt={track.name}
-                  width={200}
-                  height={200}
-                />
-                <p>{track.name}</p>
-              </li>
-            ))}
-          </ul>
-        </>
+
+          {selectedTrack?.name && (
+            <TrackModal
+              track={selectedTrack}
+              onClose={() => setSelectedTrack(null)}
+            />
+          )}
+        </div>
       )}
     </main>
   );

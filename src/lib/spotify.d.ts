@@ -1,4 +1,4 @@
-export type Track = {
+export type SpotifyTrack = {
   album: {
     album_type: string;
     artists: {

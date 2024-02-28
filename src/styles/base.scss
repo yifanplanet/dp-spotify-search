@@ -1,0 +1,68 @@
+$color-black: #111111;
+$color-gray001: #e6e6e6;
+$color-gray002: #494949;
+$color-gray003: #020102;
+$color-white: #f1efed;
+$color-whitepure: #ffffff;
+$color-lightgray: #dddddd;
+$color-yellow: #ffcb47;
+$color-beige: #dfd1c8;
+$color-navy: #052633;
+$color-blue: #69ddea;
+$color-darkgray: #333333;
+$color-red: #fe0000;
+$color-green: #1db954;
+$color-dp-purple: #6c2bff;
+
+$size-mobile: 960px;
+
+@media (min-width: $size-mobile) {
+  .hidden-desktop {
+    display: none !important;
+  }
+}
+
+@media (max-width: $size-mobile) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+.render-visible {
+  visibility: visible;
+  &-smooth {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+.render-hidden {
+  visibility: hidden;
+  &-smooth {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+.text-lg {
+  font-size: 24px;
+  font-weight: 600;
+  @media (min-width: $size-mobile) {
+    font-size: 36px;
+  }
+}
+
+.text-md {
+  font-size: 18px;
+  font-weight: 600;
+  @media (min-width: $size-mobile) {
+    font-size: 24px;
+  }
+}
+
+.text-sm {
+  font-size: 14px;
+  font-weight: 400;
+  @media (min-width: $size-mobile) {
+    font-size: 18px;
+  }
+}

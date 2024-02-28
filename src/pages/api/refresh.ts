@@ -32,22 +32,16 @@ export default async function handler(
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      data: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-        client_id: CLIENT_ID,
-      }),
+      data: params,
     });
 
     // Extract the new access token from the response
     const { access_token, expires_in, refresh_token } = response.data;
-    res
-      .status(200)
-      .json({
-        accessToken: access_token,
-        expiresIn: Date.now() + 60 * 60 * 1000,
-        refreshToken: refresh_token,
-      });
+    res.status(200).json({
+      accessToken: access_token,
+      expiresIn: Date.now() + 60 * 60 * 1000,
+      refreshToken: refresh_token,
+    });
   } catch (error) {
     res.status(401).json({ error: "Failed to refresh token" });
   }
